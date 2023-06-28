@@ -1,7 +1,9 @@
-const parser = require('@babel/parser');
-const traverse = require('@babel/traverse')
-const t = require('@babel/types')
+import parser = require('@babel/parser');
+import traverse = require('@babel/traverse');
+import t = require('@babel/types');
 const generate = require('@babel/generator').default
+
+
 
 
 /**
@@ -15,7 +17,7 @@ module.exports.textToAst = function textToAst(text) {
         plugins: ['jsx', 'typescript'],
     });
     } catch(e) {
-        return 6
+        return 6;
     }
     return ast
 }
@@ -57,24 +59,6 @@ function RangeToJSXElementGenerator(range, JSXElementSpecified, ast) {
     // return JSXElementSpecified
     return { valid: true, specified: JSXElementSpecified }
 
-}
-function RangeToJSXExpresionContainer(range, JSXExpressionContainerSpecified) {
-    traverse.default(ast, RangeToJSXExprssionContainerVisitor(range, JSXExpressionContainerSpecified))
-    if (JSXExpressionContainerSpecified.node === undefined) {
-        throw new Error("所选区域内无完整元素!")
-    }
-    return JSXExpressionContainerSpecified
-
-}
-function RangeToJSXExpressionContainer(node, opts) {
-    if (!(opts.range.start <= node.start && node.end <= opts.range.end))
-        return false
-    if (opts.node === undefined)
-        return true
-    if (opts.node.start <= node.start && node.end <= opts.node.end)
-        return false
-
-    return true
 }
 
 /**
@@ -135,8 +119,8 @@ function PathToParentPathUnilProgram(path) {
  * base on the JSXElement in current range, generate specification of parent path adjacent to Program
  * @returns specification of parent path adjacent to Program
  */
-function JSXElementToOuterFunctionDeclarationGenerator() {
-    const path = RangeToJSXElementGenerator(range, JSXElementSpecified).path
+function JSXElementToOuterFunctionDeclarationGenerator(ast) {
+    const path = RangeToJSXElementGenerator(range, JSXElementSpecified, ast).specified.path
     return PathToParentPathUnilProgram(path)
 }
 
@@ -181,7 +165,10 @@ function JSXElementToReferencesTransformer(JSXElementPath) {
                 references.add(name);
             }
             else if (parentPath.isJSXElement()) {
-                references.add(...getChildNames(path))
+                const names = getChildNames(path);
+                for(const name of names) {
+                    references.add(name);
+                }
             }
         },
     });
@@ -285,7 +272,7 @@ module.exports.modifier = function modifier(ast, JSXElementSpecified) {
         })
     }
 
-    const BasedFunctionDeclarationPath = JSXElementToOuterFunctionDeclarationGenerator().path
+    const BasedFunctionDeclarationPath = JSXElementToOuterFunctionDeclarationGenerator(ast).path
     if (fragment) {
         const FragmentElement = JSXElementSpecified.path.replaceWith(fragment)
         console.log(FragmentElement)

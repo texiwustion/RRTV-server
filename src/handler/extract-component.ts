@@ -12,11 +12,13 @@ export class ExtractComponentHandler extends ContinuousOutputHandler<node.CodeAc
         const text = document.getText(request.range)
         const ast = textToAst(text)
         if (ast === 6) {
-            return [...prevOutput]
+            connection.window.showInformationMessage("exit at 1")
+            return prevOutput;
         }
         const { valid, specified } = dataGenerator(ast)
         if (!valid) {
-            return [...prevOutput]
+            connection.window.showInformationMessage("exit at 2")
+            return prevOutput;
         }
 
 
@@ -29,11 +31,11 @@ export class ExtractComponentHandler extends ContinuousOutputHandler<node.CodeAc
         const { newText, _range } = modifier(ast, specified)
         const newRange = {
             start: {
-                line: request.range.start.line + _range.start.line,
+                line: request.range.start.line + _range.start.line - 1,
                 character: request.range.start.character + _range.start.column
             },
             end: {
-                line: request.range.start.line + _range.end.line,
+                line: request.range.start.line + _range.end.line - 1,
                 character: request.range.start.character + _range.end.column
             }
         }
@@ -43,7 +45,7 @@ export class ExtractComponentHandler extends ContinuousOutputHandler<node.CodeAc
         connection.window.showInformationMessage(newText);
         a.replace(newRange, newText)
         codeAction.edit = change.edit
-        connection.window.showInformationMessage(JSON.stringify(codeAction));
-        return [...prevOutput, codeAction]
+        // connection.window.showInformationMessage(JSON.stringify(codeAction));
+        return [...(prevOutput ?? []), codeAction]
     }
 }

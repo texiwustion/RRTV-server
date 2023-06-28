@@ -24,10 +24,6 @@ connection.onInitialize((params: InitializeParams) => {
     const result: InitializeResult = {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Incremental,
-            completionProvider: {
-                resolveProvider: true,
-            },
-            hoverProvider: false,
             codeActionProvider: true,
             executeCommandProvider: {
                 // TODO: commands be clarified and filled.
@@ -41,7 +37,7 @@ connection.onInitialize((params: InitializeParams) => {
 
 // Usage: connection.onCodeAction(createHandler<(CodeAction | Command)[], CodeActionParams>([], []));
 connection.onCodeAction(createHandler<(CodeAction | Command)[], CodeActionParams>([
-    new ExtractComponentHandler
+    new ExtractComponentHandler()
 ], []))
 // Start listening.
 documents.listen(connection);
